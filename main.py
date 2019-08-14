@@ -36,6 +36,16 @@ def _load_model():
     rev_word_map = {v: k for k, v in word_map.items()}
     #word_map = json.load(conf.wordmap)
 
+@app.route('/',methods=['GET'])
+def index():
+    return 'you can reach the server'
+@app.route('/health',methods=['GET'])
+def health():
+    if torch.cuda.is_available():
+
+        return 'torch cuda is available',200
+    else:
+        return 'no gpu pytorch',500
 #unload model
 @app.route('/unload',methods = ['GET'])
 def unload():
