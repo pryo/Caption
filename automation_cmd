@@ -1,5 +1,5 @@
 # in the deepleaning vm
-n
+sudo apt-get update && sudo apt-get install git -y
 sudo /opt/deeplearning/install-driver.sh
 sudo apt-get update && sudo apt-get install git -y
 cd ~
