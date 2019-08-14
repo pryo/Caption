@@ -1,16 +1,9 @@
 import caption
 import torch
-import torch.nn.functional as F
-import numpy as np
+
 import json
 import logging
-import torchvision.transforms as transforms
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-import skimage.transform
-import argparse
-from scipy.misc import imread, imresize
-from PIL import Image
+import requests
 import conf.local
 from flask import Flask, request,render_template,jsonify
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -42,9 +35,51 @@ def _load_model():
         word_map = json.load(j)
     rev_word_map = {v: k for k, v in word_map.items()}
     #word_map = json.load(conf.wordmap)
+
+#unload model
+@app.route('/unload',methods = ['GET'])
+def unload():
+    global checkpoint
+    global decoder
+    global encoder
+    #global device
+    global word_map
+    global rev_word_map
+    checkpoint = None
+    decoder = None
+    encoder = None
+    word_map = None
+    rev_word_map = None
+    torch.cuda.empty_cache()
+    return 'model unloaded',200
+
+@app.route('/load',methods = ['GET'])
+def load():
+    global checkpoint
+    global decoder
+    global encoder
+    global device
+    global word_map
+    global rev_word_map
+    checkpoint = torch.load(conf.checkpoint)
+    decoder = checkpoint['decoder']
+    decoder = decoder.to(device)
+    decoder.eval()
+    encoder = checkpoint['encoder']
+    encoder = encoder.to(device)
+    encoder.eval()
+    with open(conf.wordmap, 'r') as j:
+        word_map = json.load(j)
+    rev_word_map = {v: k for k, v in word_map.items()}
+# to cpu
+def translate(words,translate_api=conf.translate_api):
+    string = ' '.join(words)
+    #r = requests.post(local_url, json=[{"id": 100, "src": "what is this."}])
+    r = requests.post(translate_api, json=[{"id": conf.model_id, "src": string}], timeout=400)
+    return r
 @app.route('/predict',methods=['POST'])
 def predict():
-    beam = None
+    # beam = None
     try:
         img_obj = request.files['picture']
     except:
@@ -57,12 +92,18 @@ def predict():
     except:
         logging.exception('Invalid beam input')
         beam = 5
+    try:
+        translate_api = request.args['translate_api']
+    except:
+        logging.exception('no translator api specified, using the one in the conf file')
     seq,alphas = caption.caption_image_beam_search(encoder,decoder,img_obj,word_map,beam_size=beam)
     # seq is a list of numbers
+
     words = [rev_word_map[ind] for ind in seq]
     # words is a list of string
+    r =translate(words,translate_api)
 
-    return jsonify(words)
+    return r
 
 
 @app.errorhandler(500)

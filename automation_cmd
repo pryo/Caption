@@ -1,0 +1,7 @@
+# in the deepleaning vm
+sudo /opt/deeplearning/install-driver.sh
+sudo apt-get update && sudo apt-get install git -y
+git clone https://github.com/pryo/openNMT.git
+cd openNMT
+sudo pip3 install -r requirements.txt
+sudo gunicorn --workers=4 --bind 0.0.0.0:8000 main:app --daemon
