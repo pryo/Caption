@@ -94,6 +94,7 @@ def predict():
         img_obj = request.files['picture']
     except:
         logging.exception('Error with image upload')
+        return 'Error with image upload',500
     try:
         beam_arg = request.args['beam_size']
         #beam = request.files['beam_size']
@@ -102,17 +103,22 @@ def predict():
     except:
         logging.exception('Invalid beam input')
         beam = 5
+
     try:
         translate_api = request.args['translate_api']
     except:
         logging.exception('no translator api specified, using the one in the conf file')
     seq,alphas = caption.caption_image_beam_search(encoder,decoder,img_obj,word_map,beam_size=beam)
     # seq is a list of numbers
-
-    words = [rev_word_map[ind] for ind in seq]
+    try:
+        words = [rev_word_map[ind] for ind in seq]
+    except:
+        return 'can not get word from seq',500
     # words is a list of string
-    r =translate(words,translate_api)
-
+    try:
+        r =translate(words,translate_api)
+    except:
+        'translate failed',500
     return r
 
 
