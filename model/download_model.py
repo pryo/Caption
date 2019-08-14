@@ -2,7 +2,7 @@ from google.cloud import storage
 
 
 #config=conf.local()
-bucket_name='learnalbe-proj-model'
+bucket_name='learnable-proj-model'
 # client = storage.Client()
 # bucket = client.get_bucket(config.MODEL_BUCKET)
 # blob = bucket.blob(config.)
