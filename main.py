@@ -1,6 +1,8 @@
 import caption
 import torch
-
+import traceback
+import fluent.event
+import fluent.sender
 import json
 import logging
 import requests
@@ -15,6 +17,17 @@ decoder = None
 encoder = None
 word_map = None
 rev_word_map  = None
+
+fluent.sender.setup('caption_service', host='localhost', port=24224)
+
+def report(ex):
+    data = {}
+    data['message'] = '{0}'.format(ex)
+    data['serviceContext'] = {'service': 'caption_service'}
+    # ... add more metadata
+    fluent.event.Event('errors', data)
+
+
 @app.before_first_request
 def _load_model():
 
@@ -85,7 +98,7 @@ def load():
 def translate(words,translate_api=conf.translate_api):
     string = ' '.join(words)
     #r = requests.post(local_url, json=[{"id": 100, "src": "what is this."}])
-    r = requests.post(translate_api, json=[{"id": conf.model_id, "src": string}], timeout=400)
+    r = requests.post(translate_api, json=[{"id": conf.model_id, "src": string}], timeout=30)
     return r
 @app.route('/predict',methods=['POST'])
 def predict():
@@ -93,6 +106,7 @@ def predict():
     try:
         img_obj = request.files['picture']
     except:
+        report(traceback.format_exc())
         logging.exception('Error with image upload')
         return 'Error with image upload',500
     try:
@@ -101,23 +115,27 @@ def predict():
         assert 0<int(beam_arg)<10
         beam = int(beam_arg)
     except:
+        report(traceback.format_exc())
         logging.exception('Invalid beam input')
         beam = 5
 
     try:
         translate_api = request.args['translate_api']
     except:
+        report(traceback.format_exc())
         logging.exception('no translator api specified, using the one in the conf file')
     seq,alphas = caption.caption_image_beam_search(encoder,decoder,img_obj,word_map,beam_size=beam)
     # seq is a list of numbers
     try:
         words = [rev_word_map[ind] for ind in seq]
     except:
+        report(traceback.format_exc())
         return 'can not get word from seq',500
     # words is a list of string
     try:
         r =translate(words,translate_api)
     except:
+        report(traceback.format_exc())
         'translate failed',500
     if r.status_code==500:
         return 'translation server give 500'
