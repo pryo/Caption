@@ -119,6 +119,8 @@ def predict():
         r =translate(words,translate_api)
     except:
         'translate failed',500
+    if r.status_code==500:
+        return 'translation server give 500'
     return r
 
 
