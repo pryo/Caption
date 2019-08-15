@@ -124,7 +124,7 @@ def capting():
     except:
         report(traceback.format_exc())
         return 'can not get word from seq', 500
-    return words
+    return jsonify(words)
 @app.route('/predict',methods=['POST'])
 def predict():
     # beam = None

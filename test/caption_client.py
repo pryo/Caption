@@ -1,7 +1,7 @@
 import requests
 if __name__ == '__main__':
     local_url = ' http://127.0.0.1:80/predict'
-    gc_caption_url = 'http://146.148.103.174/predict'
+    gc_caption_url = 'http://35.222.188.209/capting'
     gce_translate_url = 'http://104.197.123.37/translate'
     combine_url = 'http://146.148.103.174/caption_translate'
     # files = {'picture':open(input('image path: '),'rb'),'beam_size':input('beam size: ')}
@@ -10,7 +10,7 @@ if __name__ == '__main__':
     files = {'picture': open(local_img, 'rb')}
     # r = requests.post(gc_caption_url,params = {'beam_size':5,'translate_api':gce_translate_url},
     #                   files=files,timeout=400)
-    r = requests.post(combine_url, params={'beam_size': 5},
+    r = requests.post(gc_caption_url, params={'beam_size': 5},
                       files=files, timeout=400)
 
     print(r.text)
