@@ -7,6 +7,9 @@ import json
 import logging
 import requests
 import conf.local
+import time
+
+
 from flask import Flask, request,render_template,jsonify
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 app = Flask(__name__)
@@ -150,7 +153,12 @@ def predict():
     except:
         report(traceback.format_exc())
         logging.exception('no translator api specified, using the one in the conf file')
+    start = time.time()
+
     seq,alphas = caption.caption_image_beam_search(encoder,decoder,img_obj,word_map,beam_size=beam)
+    end = time.time()
+    cap_elapse = start-end
+    print('caption used ',cap_elapse,'seconds')
     # seq is a list of numbers
     try:
         words = [rev_word_map[ind] for ind in seq]
@@ -159,12 +167,17 @@ def predict():
         return 'can not get word from seq',500
     # words is a list of string
     try:
+        start = time.time()
         r =translate(words,translate_api)
+        end = time.time()
+        trans_elapse = start-end
+        print('translate used:',trans_elapse)
     except:
         report(traceback.format_exc())
         return 'translate failed',500
     if r.status_code==500:
         return 'translation server give 500'
+
     return r.text
 
 
