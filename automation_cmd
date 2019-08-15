@@ -10,7 +10,7 @@ git clone https://github.com/pryo/Caption.git
 cd Caption
 
 sudo pip3 install -r requirements.txt
-
+sudo pip3 install torch==0.4.1 -f https://download.pytorch.org/whl/cu100/stable
 cd model
 
 python download_model.py
