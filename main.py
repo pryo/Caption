@@ -165,7 +165,7 @@ def predict():
         return 'translate failed',500
     if r.status_code==500:
         return 'translation server give 500'
-    return r
+    return r.text
 
 
 @app.errorhandler(500)

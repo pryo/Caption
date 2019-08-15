@@ -3,7 +3,7 @@ if __name__ == '__main__':
     local_url = ' http://127.0.0.1:80/predict'
     gc_caption_only_url = 'http://35.222.188.209/capting'
     gc_dist_url = 'http://35.222.188.209/predict'
-    gce_translate_url = 'https://146.148.103.174/translate'
+    gce_translate_url = 'http://146.148.103.174/translate'
     combine_url = 'http://146.148.103.174/caption_translate'
     # files = {'picture':open(input('image path: '),'rb'),'beam_size':input('beam size: ')}
     online_img = '~/Caption/test/IMG_4039.jpg'
