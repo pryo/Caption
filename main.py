@@ -128,6 +128,7 @@ def capting():
 @app.route('/predict',methods=['POST'])
 def predict():
     # beam = None
+
     try:
         img_obj = request.files['picture']
     except:
@@ -161,7 +162,7 @@ def predict():
         r =translate(words,translate_api)
     except:
         report(traceback.format_exc())
-        'translate failed',500
+        return 'translate failed',500
     if r.status_code==500:
         return 'translation server give 500'
     return r
