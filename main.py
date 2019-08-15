@@ -100,6 +100,31 @@ def translate(words,translate_api=conf.translate_api):
     #r = requests.post(local_url, json=[{"id": 100, "src": "what is this."}])
     r = requests.post(translate_api, json=[{"id": conf.model_id, "src": string}], timeout=30)
     return r
+@app.route('/capting',methods=['POST'])
+def capting():
+    try:
+        img_obj = request.files['picture']
+    except:
+        report(traceback.format_exc())
+        logging.exception('Error with image upload')
+        return 'Error with image upload',500
+    try:
+        beam_arg = request.args['beam_size']
+        #beam = request.files['beam_size']
+        assert 0<int(beam_arg)<10
+        beam = int(beam_arg)
+    except:
+        report(traceback.format_exc())
+        logging.exception('Invalid beam input')
+        beam = 5
+    seq, alphas = caption.caption_image_beam_search(encoder, decoder, img_obj, word_map, beam_size=beam)
+    # seq is a list of numbers
+    try:
+        words = [rev_word_map[ind] for ind in seq]
+    except:
+        report(traceback.format_exc())
+        return 'can not get word from seq', 500
+    return words
 @app.route('/predict',methods=['POST'])
 def predict():
     # beam = None
