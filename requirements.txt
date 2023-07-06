@@ -1,5 +1,5 @@
 pillow==6.1.0
-scipy==1.0.0
+scipy==1.10.0
 
 numpy
 matplotlib
